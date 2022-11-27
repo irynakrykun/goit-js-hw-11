@@ -1,61 +1,51 @@
 import './css/styles.css';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import { FetchImage } from './fetch';
+// import { FetchImage } from './fetch';
+import { PictureApiService } from './fetch';
 
 const formEl = document.querySelector('.search-form');
 const gallery = document.querySelector('.gallery');
 const loadMoreBtn = document.querySelector('.load-more');
-
+const pictureApiService = new PictureApiService();
 loadMoreBtn.addEventListener('click', OnLoadMore);
 
 formEl.addEventListener('submit', onSubmit);
-
-
-function onSubmit(e) {
+async function onSubmit(e) {
   e.preventDefault();
+
   const {
     elements: { searchQuery },
   } = e.currentTarget;
-  formValue = searchQuery.value;
-  console.log(formValue);
-
-  if (!formValue) {
-    Notify.info('add Name!');
+  const query = searchQuery.value.trim();
+  if (!query) {
     return;
   }
-  FetchImage(formValue).then((data) => CreateImage(data));
+  pictureApiService.resetPage();
+  gallery.innerHTML = '';
+  loadMoreBtn.classList.add('is-hidden');
+  pictureApiService.formValue = query;
+  try {
+    const hits = await pictureApiService.fetchImage();
+    console.log(hits);
+    if (hits.length === 0) {
+      Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+      return;
+    }
+    CreateImage(hits);
+    const ShowLoadMoreBtn = pictureApiService.haveMoreImages();
+    if (ShowLoadMoreBtn) {
+      loadMoreBtn.classList.remove('is-hidden');
+    }
+  } catch (error) {}
 }
 
-// function FetchImage(value) {
-//    axios
-//     .get(
-//       `${BASE_URL}?key=${KEY_API}&image_type=photo&orientation=horizontal&safesearch=true&q=${value}&per-page=40&page=1`,
-//       {
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-//       }
-//     )
-//     .then(response => {
-//       console.log(response.data);
-//     })
-//     .catch(error => {
-//       Notify.failure(
-//         'Sorry, there are no images matching your search query. Please try again.'
-//       );
-//     });
-// }
-
 function CreateImage(data) {
-  if (data.length === 0) {
-    Notify.failure(
-      'Sorry, there are no images matching your search query. Please try again.'
-    );
-    return;
-  } else {
-    let markup = data.map((item) => {
-              return ` <div class="photo-card">
-  <img src="${item.webformatURL}" alt="${item.tags}" loading="lazy" />
+  let markup = data
+    .map(item => {
+      return ` <div class="photo-card">
+  <img src="${item.webformatURL}" alt="${item.tags}" loading="lazy" width='250px' />
   <div class="info">
     <p class="info-item">
       <b>Likes:${item.likes}</b>
@@ -71,11 +61,22 @@ function CreateImage(data) {
     </p>
   </div>
 </div>`;
-      })
+    })
 
-      .join('');
-  
-    gallery.innerHTML = markup;
-  }
+    .join('');
+
+  gallery.insertAdjacentHTML('beforeend', markup);
 }
-function OnLoadMore(e) {}
+async function OnLoadMore(e) {
+  
+  pictureApiService.incrementPage();
+  const ShowLoadMoreBtn = pictureApiService.haveMoreImages();
+  if (!ShowLoadMoreBtn) {
+    loadMoreBtn.classList.add('is-hidden');
+  }
+  try {
+    const hits = await pictureApiService.fetchImage();
+    console.log(hits);
+    CreateImage(hits);
+  } catch (error) {}
+}
