@@ -24,7 +24,7 @@ body {
 .load-more {
   padding: 8px 12px;
   background-color: blue;
-  align-items: center;
+  text-align: center;
 }
 .load-more.is-hidden {
   display: none;
@@ -40,11 +40,15 @@ body {
   margin-left: auto;
   margin-right: auto;
 }
+
 .info {
   display: flex;
-  gap: 5px;
+  justify-content: center;
+  gap: 20px;
 }
-.info-item {
+p {
+  display: flex;
+  flex-direction: column;
   text-align: center;
   font-size: 10px;
 }

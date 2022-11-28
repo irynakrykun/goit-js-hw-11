@@ -47,24 +47,24 @@ function CreateImage(data) {
   let markup = data
     .map(item => {
       return ` <div class="photo-card"><div class="thumb"><a class="gallery-item" href="${item.largeImageURL}">
-  <img src="${item.webformatURL}" alt="${item.tags}" loading="lazy" width='250px'/></a></div>
+  <img src="${item.webformatURL}" alt="${item.tags}" loading="lazy" width="350px" height="250px"/></a></div>
   <div class="info">
     <p class="info-item">
-      <b>Likes: ${item.likes}</b>
-      
-          </p>
+      <b>Likes</b>
+      <span>${item.likes}</span>
+                </p>
     <p class="info-item">
-      <b>Views: ${item.views}</b>
-      
-          </p>
+      <b>Views</b>
+      <span>${item.views}</span>
+                </p>
     <p class="info-item">
-      <b>Comments: ${item.comments}</b>
-      
-          </p>
+      <b>Comments</b>
+      <span>${item.comments}</span>
+                </p>
     <p class="info-item">
-      <b>Dowloads: ${item.downloads}</b>
-      
-    </p>
+      <b>Dowloads</b>
+      <span>${item.downloads}</span>
+          </p>
      </div>
 </div>`;
     })
@@ -80,7 +80,7 @@ async function OnLoadMore(e) {
   const ShowLoadMoreBtn = pictureApiService.haveMoreImages();
   if (!ShowLoadMoreBtn) {
     loadMoreBtn.classList.add('is-hidden');
-    Notify.info("We're sorry, but you've reached the end of search results.")
+    Notify.info("We're sorry, but you've reached the end of search results.");
   }
   try {
     const hits = await pictureApiService.fetchImage();
