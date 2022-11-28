@@ -1,7 +1,9 @@
 import './css/styles.css';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-// import { FetchImage } from './fetch';
 import { PictureApiService } from './fetch';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
+let lightbox = new SimpleLightbox('.gallery a');
 
 const formEl = document.querySelector('.search-form');
 const gallery = document.querySelector('.gallery');
@@ -44,8 +46,8 @@ async function onSubmit(e) {
 function CreateImage(data) {
   let markup = data
     .map(item => {
-      return ` <div class="photo-card">
-  <img src="${item.webformatURL}" alt="${item.tags}" loading="lazy" width='250px' />
+      return ` <div class="photo-card"><div class="thumb"><a class="gallery-item" href="${item.largeImageURL}">
+  <img src="${item.webformatURL}" alt="${item.tags}" loading="lazy" width='250px'/></a></div>
   <div class="info">
     <p class="info-item">
       <b>Likes:${item.likes}</b>
@@ -59,24 +61,26 @@ function CreateImage(data) {
     <p class="info-item">
       <b>Dowloads:${item.downloads}</b>
     </p>
-  </div>
+     </div>
 </div>`;
     })
 
     .join('');
 
   gallery.insertAdjacentHTML('beforeend', markup);
+  lightbox = new SimpleLightbox('.gallery a');
 }
+
 async function OnLoadMore(e) {
-  
   pictureApiService.incrementPage();
   const ShowLoadMoreBtn = pictureApiService.haveMoreImages();
   if (!ShowLoadMoreBtn) {
     loadMoreBtn.classList.add('is-hidden');
+    Notify.info("We're sorry, but you've reached the end of search results.")
   }
   try {
     const hits = await pictureApiService.fetchImage();
-    console.log(hits);
     CreateImage(hits);
+    lightbox.refresh();
   } catch (error) {}
 }
